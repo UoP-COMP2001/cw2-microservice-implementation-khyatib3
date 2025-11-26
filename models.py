@@ -1,0 +1,64 @@
+
+from config import db, ma
+
+class Location(db.Model):
+    __tablename__ = "Location"
+    __table_args__ = {"schema": "CW2"}
+    locationId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    location = db.Column(db.String(255), nullable=False)
+
+class LocationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Location
+        load_instance = True
+        sql_session = db.session
+
+class Users(db.Model):
+    __tablename__ = "Users"
+    __table_args__ = {"schema" : "CW2"}
+    userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    admin_role = db.Column(db.Boolean, default=True)
+    password = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    email = db.Column(db.String(150), nullable=True)
+    phone_no = db.Column(db.Integer, nullable=True)
+    first_name = db.Column(db.String(60), nullable=True)
+    last_name = db.Column(db.String(70), nullable=True)
+    dob = db.Column(db.Date(), nullable=True)
+    height = db.Column(db.Numeric(5,2), nullable=True)
+    weight = db.Column(db.Numeric(5,2), nullable=True)
+    marketing_language = db.Column(db.String(50), nullable=True)
+    about_me = db.Column(db.String(700), nullable=True)
+    preferred_unit_metric = db.Column(db.String(10), nullable=True)
+    time_preference_speed = db.Column(db.String(10), nullable=True)
+    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationId'))
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Users
+        load_instance = True
+        sql_session = db.session
+
+class Activity(db.Model):
+    __tablename__ = "Activity"
+    __table_args__ = {"schema": "CW2"}
+    activityID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    activity_name = db.Column(db.String(50), nullable=False)
+
+class ActivitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Activity
+        load_instance = True
+        sql_session = db.session
+
+class UserActivity(db.Model):
+    __tablename__ = "UserActivity"
+    __table_args__ = {"schema": "CW2"}
+    userID = db.Column(db.Integer, db.ForeignKey('CW2.Users.userID'), primary_key=True, nullable=False)
+    activityID = db.Column(db.Integer, db.ForeignKey('CW2.Activity.activityID'), primary_key=True, nullable=False)    
+
+class UserActivitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserActivity
+        load_instance = True
+        sql_session = db.session

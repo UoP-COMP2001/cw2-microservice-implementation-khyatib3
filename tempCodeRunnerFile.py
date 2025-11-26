@@ -1,0 +1,1 @@
+app.add_api(config.basedir / "swagger.yml")

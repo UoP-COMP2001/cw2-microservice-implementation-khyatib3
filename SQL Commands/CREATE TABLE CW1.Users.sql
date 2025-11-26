@@ -1,0 +1,21 @@
+CREATE TABLE CW2.Users(
+    userID INT identity(1,1) NOT NULL,
+    admin_role bit NOT NULL DEFAULT 'FALSE',  
+    password VARCHAR(100) NOT NULL,
+    locationID INT,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(150),
+    phone_no INT,
+    first_name VARCHAR(60),
+    last_name VARCHAR(70),
+    dob DATE,
+    height DECIMAL(5,2),
+    weight DECIMAL(5,2),
+    marketing_language VARCHAR(50),
+    about_me VARCHAR(700),
+    preferred_unit_metric VARCHAR(10),
+    time_preference_speed VARCHAR(10),
+    CONSTRAINT pk_userID PRIMARY KEY (userID),
+    CONSTRAINT fk_locationID FOREIGN KEY (locationID) REFERENCES CW2.Location(locationID),
+    CHECK (email LIKE '%@%')
+);

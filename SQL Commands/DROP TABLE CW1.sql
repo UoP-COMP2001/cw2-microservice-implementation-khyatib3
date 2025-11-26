@@ -1,0 +1,1 @@
+DROP TABLE CW2.Location;
