@@ -1,13 +1,13 @@
 CREATE TABLE CW2.Users(
-    userID INT identity(1,1) NOT NULL,
-    admin_role bit NOT NULL DEFAULT 'FALSE',  
-    password VARCHAR(100) NOT NULL,
+    userID INT identity(1,1) NOT NULL,  
+    hashed_password VARCHAR(128) NOT NULL,
     locationID INT,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    email VARCHAR(150),
+    roleID TINYINT NOT NULL,
+    username VARCHAR(40) UNIQUE NOT NULL,
+    email VARCHAR(60) CHECK (email LIKE '%@%'),
     phone_no INT,
-    first_name VARCHAR(60),
-    last_name VARCHAR(70),
+    first_name VARCHAR(40),
+    last_name VARCHAR(40),
     dob DATE,
     height DECIMAL(5,2),
     weight DECIMAL(5,2),
@@ -16,6 +16,7 @@ CREATE TABLE CW2.Users(
     preferred_unit_metric VARCHAR(10),
     time_preference_speed VARCHAR(10),
     CONSTRAINT pk_userID PRIMARY KEY (userID),
+    CONSTRAINT fk_roleID FOREIGN KEY (roleID) REFERENCES CW2.Roles,
     CONSTRAINT fk_locationID FOREIGN KEY (locationID) REFERENCES CW2.Location(locationID),
-    CHECK (email LIKE '%@%')
+    
 );

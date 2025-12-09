@@ -1,9 +1,8 @@
-
 from config import db, ma
-
+from sqlalchemy.dialects import mssql
 class Location(db.Model):
     __tablename__ = "Location"
-    __table_args__ = {"schema": "CW2"}
+    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
     locationId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     location = db.Column(db.String(255), nullable=False)
 
@@ -12,18 +11,20 @@ class LocationSchema(ma.SQLAlchemyAutoSchema):
         model = Location
         load_instance = True
         sql_session = db.session
+location_schema = LocationSchema()        
 
 class Users(db.Model):
     __tablename__ = "Users"
-    __table_args__ = {"schema" : "CW2"}
+    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    admin_role = db.Column(db.Boolean, default=True)
-    password = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(100), nullable=False, unique=True)
-    email = db.Column(db.String(150), nullable=True)
+    roleID = db.Column(db.Integer, db.ForeignKey('CW2.Roles.roleID'))
+    hashed_password = db.Column(db.String(128), nullable=False)
+    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationId'))
+    username = db.Column(db.String(40), nullable=False, unique=True)
+    email = db.Column(db.String(60), nullable=True)
     phone_no = db.Column(db.Integer, nullable=True)
-    first_name = db.Column(db.String(60), nullable=True)
-    last_name = db.Column(db.String(70), nullable=True)
+    first_name = db.Column(db.String(40), nullable=True)
+    last_name = db.Column(db.String(40), nullable=True)
     dob = db.Column(db.Date(), nullable=True)
     height = db.Column(db.Numeric(5,2), nullable=True)
     weight = db.Column(db.Numeric(5,2), nullable=True)
@@ -31,17 +32,18 @@ class Users(db.Model):
     about_me = db.Column(db.String(700), nullable=True)
     preferred_unit_metric = db.Column(db.String(10), nullable=True)
     time_preference_speed = db.Column(db.String(10), nullable=True)
-    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationId'))
+    
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Users
         load_instance = True
         sql_session = db.session
+users_schema = UserSchema()        
 
 class Activity(db.Model):
     __tablename__ = "Activity"
-    __table_args__ = {"schema": "CW2"}
+    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
     activityID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     activity_name = db.Column(db.String(50), nullable=False)
 
@@ -50,10 +52,11 @@ class ActivitySchema(ma.SQLAlchemyAutoSchema):
         model = Activity
         load_instance = True
         sql_session = db.session
+activity_schema = ActivitySchema()
 
 class UserActivity(db.Model):
     __tablename__ = "UserActivity"
-    __table_args__ = {"schema": "CW2"}
+    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
     userID = db.Column(db.Integer, db.ForeignKey('CW2.Users.userID'), primary_key=True, nullable=False)
     activityID = db.Column(db.Integer, db.ForeignKey('CW2.Activity.activityID'), primary_key=True, nullable=False)    
 
@@ -62,3 +65,4 @@ class UserActivitySchema(ma.SQLAlchemyAutoSchema):
         model = UserActivity
         load_instance = True
         sql_session = db.session
+user_activity_schema = UserActivitySchema()
