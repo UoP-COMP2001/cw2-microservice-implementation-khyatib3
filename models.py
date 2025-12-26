@@ -19,7 +19,7 @@ class Users(db.Model):
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     roleID = db.Column(db.Integer, db.ForeignKey('CW2.Roles.roleID'))
     hashed_password = db.Column(db.String(128), nullable=False)
-    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationId'))
+    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationID'))
     username = db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(60), nullable=True)
     phone_no = db.Column(db.Integer, nullable=True)
@@ -66,3 +66,16 @@ class UserActivitySchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         sql_session = db.session
 user_activity_schema = UserActivitySchema()
+
+class Roles(db.Model):
+    __tablename__ = "Roles"
+    __table_args__ = {"schema": "CW2", 'implicit_returning': False}
+    roleID = db.Column(db.Integer, primary_key=True)
+    role_name = db.Column(db.String(10), nullable=False, unique=True)
+
+class RolesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Roles
+        load_instance = True
+        sql_session = db.session
+roles_schema = RolesSchema()
