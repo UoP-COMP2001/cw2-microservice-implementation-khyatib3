@@ -70,7 +70,7 @@ user_activity_schema = UserActivitySchema()
 class Roles(db.Model):
     __tablename__ = "Roles"
     __table_args__ = {"schema": "CW2", 'implicit_returning': False}
-    roleID = db.Column(db.Integer, primary_key=True)
+    roleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     role_name = db.Column(db.String(10), nullable=False, unique=True)
 
 class RolesSchema(ma.SQLAlchemyAutoSchema):
@@ -79,3 +79,19 @@ class RolesSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         sql_session = db.session
 roles_schema = RolesSchema()
+
+class UserSavedTrails(db.Model):
+    __tablename__ = "UserSavedTrails"
+    __table_args__ = {"schema": "CW2", 'implicit_returning': False}
+    userID = db.Column(db.Integer, db.ForeignKey('CW2.Users.userID'), primary_key=True,  nullable=False)
+    trailID = db.Column(db.Integer, primary_key=True, nullable=False)
+    trail_saved_timestamp = db.Column(db.DateTime, nullable=False, server_default=db.func.sysdatetime())
+
+class UserSavedTrailsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = UserSavedTrails
+        load_instance = True
+        sql_session = db.session
+user_saved_trails_schema = UserSavedTrailsSchema()
+user_saved_trails_schema_many = UserSavedTrailsSchema(many=True) # for returning lists of saved trail
+
