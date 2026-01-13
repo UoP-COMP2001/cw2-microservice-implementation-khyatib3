@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema, validate
-from models import Users, UserActivity, Activity, UserSavedTrails
+from models.models import Users, UserActivity, Activity, UserSavedTrails
 
 class DisplayAccountSchema(Schema):
     # all fields to show when showing user account info

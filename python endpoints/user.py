@@ -54,9 +54,13 @@ def updateUser():
         user.preferred_unit_metric = new_data.preferred_unit_metric
 
         new_user_data = update_account_schema.load(new_data, instance=user, partial=True)
+        db.session.add(new_user_data)
         db.session.commit()
+        return jsonify({"message": "User account updated successfully"}), 200
+    else:
+        return jsonify({"error_message": "User not found"}), 404
 
-@app.route("/user/<string:activity_name>", methods=["PUT"])
+@app.route("/user/activities/<string:activity_name>", methods=["PUT"])
 def addActivity(activity_name):
     if not request.authorization:
         return jsonify({"error_message": "Credentials not found"}), 401
@@ -125,11 +129,13 @@ def deleteUser():
     email = request.authorization.username
     password = request.authorization.password
 
-    validated_email, validated_password = authenticator.user_authenticator(email, password).values()
-    if email != validated_email or password != validated_password:
+    if not email or not password:
         return jsonify({"error_message": "Email and password not found"}), 401 # returning appropriate message to user
 
     user: Users = Users.query.filter_by(email == email).first() # find user with given username
+    
+    if user.email != email or user.password != password:
+        return jsonify({"error_message": "Access denied"}), 401 # returning appropriate message to user
 
     if user:
         config.db.session.delete(user) # deleting user

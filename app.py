@@ -1,9 +1,9 @@
 from flask import jsonify, render_template, request
-import config
-from models import Users, UserActivity, Location, Activity
+from config.config import connex_app, basedir
+from models.models import Users, UserActivity, Location, Activity
 
-app = config.connex_app
-app.add_api(config.basedir / "swagger.yml")
+app = connex_app
+app.add_api(basedir.parent / "swagger" / "swagger.yml")
 
 @app.route("/")
 def home():

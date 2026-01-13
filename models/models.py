@@ -1,5 +1,6 @@
-from config import db, ma
 from sqlalchemy.dialects import mssql
+from config.config import db
+
 class Location(db.Model):
     __tablename__ = "Location"
     __table_args__ = {"schema": "CW2", 'implicit_returning':False}

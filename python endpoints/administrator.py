@@ -9,7 +9,7 @@ from passlib.hash import argon2
 # set the session
 session = db.session
 
-@app.route("/admin", methods=["GET"])
+@app.route("/admin/accounts", methods=["GET"])
 def getAllUsers():
     if not request.authorization:
         return make_response(jsonify({"error_message": "Credentials not found"}), 401) # returning appropriate message to user
