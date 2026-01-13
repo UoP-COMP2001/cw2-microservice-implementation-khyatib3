@@ -1,1 +1,2 @@
-app.add_api(config.basedir / "swagger.yml")
+import config
+import app

@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: "AllTrails Users RESTful API"
+  version: 1.0.0
+
+servers:
+  - url: "/profileservice-api"
+
+# add security
+security:
+  - basicAuth: []
+
+components:
+  schemas:
+    Users:
+      type: object
+    Admin:
+      type: object
+    CreateUserSchema:
+      type: object
+      description: Schema for creating a new user account.
+      properties:
+        username:
+          type: string
+          description: "Username of the user."
+          example: "John Doe"
+        email:
+          type: string 
+          description: "Email of the user."
+          example: "john@plymouth.ac.uk"
+        password:
+          type: string
+          description: "Password for the user account."
+    UpdateAccountSchema:
+      type: object      
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: authenticator.authenticate_user
+  parameters:
+    email:
+      name: email
+      description: "User's email"
+      in: path
+      required: true
+      schema:
+        type: string
+    password: 
+       name: password
+       description: "User's password"
+       in: path
+       required: true
+       schema:
+         type: string
+
+paths:
+  /user:
+    get:
+      operationId: user.getUser
+      security:
+        - basicAuth: []
+      tags:
+        - Users
+      summary: "Show profile of a general user"  
+
+    post:
+      operationId: user.createNewUser
+      tags:
+        - Users
+      summary: "Create a account for new user"
+      requestBody:
+        description: "User to create"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserSchema"
+      responses:
+        201:
+          description: "Account created"
+        409:
+          description: Conflict – username or email already exists
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      enum: [USERNAME_EXISTS, EMAIL_EXISTS]
+                    message:
+                      type: string
+        400:
+          description: Invalid data input
+
+    put:
+      operationId: user.updateUser  
+      security:
+        - basicAuth: []
+      tags:
+        - Users
+      summary: "Update account details of the user"
+      requestBody:
+        description: "Updated user data"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountSchema"     
+                       
+   
+
+        
+

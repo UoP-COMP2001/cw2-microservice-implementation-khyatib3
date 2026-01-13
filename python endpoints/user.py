@@ -13,14 +13,16 @@ app = config.connex_app
 
 @app.route("/user", methods=["GET"])
 def getUser():
-    email = request.args.get("email") # get passed in email
-    password = request.args.get("password") # get password 
+    email = request.authorization.username
+    password = request.authorization.password
 
-    validated_email, validated_password = authenticator.user_authenticator(email, password).values()
-    if email != validated_email or password != validated_password:
+    if not email or not password:
         return jsonify({"error_message": "Email and password not found"}), 401 # returning appropriate message to user
 
     u: Users = Users.query.filter_by(email == email, password == password).first() # find user with given email and password
+    if u.email != email or u.password != password:
+        return jsonify({"error_message": "Access denied"}), 401 # returning appropriate message to user
+
     if u:
         return jsonify(display_user_schema.dump(u)), 200 # returning user data if found
     else:
@@ -28,8 +30,8 @@ def getUser():
     
 @app.route("/user", methods=["PUT"])
 def updateUser():
-    email = request.args.get("email")
-    password = request.args.get("password")
+    email = request.authorization.username
+    password = request.authorization.password
 
     new_data = request.get_json()
     if not email or not password:
@@ -92,7 +94,7 @@ def createNewUser():
     username = creds.get("username") # getting username since backlog says user wants to create account with username
     email = creds.get("email") # getting email
     password = creds.get("password") # getting password
-    roleID = "0" # set roleID to general user by default
+    roleID = "2" # set roleID to belong to general user role by default
 
     existing_email = Users.query.filter_by(username=username).first() # checking for user with same email already existing
     if existing_email:
@@ -120,8 +122,8 @@ def createNewUser():
 
 @app.route("/user", methods=["DELETE"])
 def deleteUser():
-    email = request.args.get("email") # get passed in username
-    password = request.args.get("password") # get passed in password
+    email = request.authorization.username
+    password = request.authorization.password
 
     validated_email, validated_password = authenticator.user_authenticator(email, password).values()
     if email != validated_email or password != validated_password:
