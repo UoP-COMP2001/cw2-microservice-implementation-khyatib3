@@ -55,16 +55,13 @@ display_user_schema = DisplayAccountSchema() # for a single user
 class CreateAccountSchema(Schema):
     username = fields.Str(required=True, validate=validate.Length(min=4, max=40))
     password = fields.Str(required=True, validate=validate.Length(min=6, max=128))
-    email = fields.Str(validate=validate.Length(max=60))
+    email = fields.Email(required=True, validate=validate.Length(max=60))
 create_account_schema = CreateAccountSchema()
 
 class UpdateAccountSchema(Schema):
-    username = fields.Str(validate=validate.Length(min=4, max=40))
-    password = fields.Str(validate=validate.Length(min=6, max=128))
-    email = fields.Str(validate=validate.Length(max=60))
     phone_no = fields.Int()
-    first_name = fields.Str()
-    last_name = fields.Str()
+    first_name = fields.Str(validate=validate.Length(max=40))
+    last_name = fields.Str(validate=validate.Length(max=40))
     dob = fields.Date()
     height = fields.Decimal()
     weight = fields.Decimal()
@@ -72,4 +69,4 @@ class UpdateAccountSchema(Schema):
     marketing_language = fields.Str(validate=validate.Length(max=50))
     preferred_unit_metric = fields.Str(validate=validate.Length(max=10))
     time_preference_speed = fields.Str(validate=validate.Length(max=10))
-update_account_schema = UpdateAccountSchema()             
+update_account_schema = UpdateAccountSchema()

@@ -1,46 +1,47 @@
-from sqlalchemy.dialects import mssql
-from config.config import db
+from config.config import db, app
+from datetime import datetime
+from utility.utilities import get_table_args, fk_ref, get_timestamp_default
 
 class Location(db.Model):
     __tablename__ = "Location"
-    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
-    locationID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __table_args__ = get_table_args()
+    locationId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     location = db.Column(db.String(255), nullable=False)        
 
 
 class Activity(db.Model):
     __tablename__ = "Activity"
-    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
+    __table_args__ = get_table_args()
     activityID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     activity_name = db.Column(db.String(50), nullable=False)
 
 class UserActivity(db.Model):
     __tablename__ = "UserActivity"
-    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
-    userID = db.Column(db.Integer, db.ForeignKey('CW2.Users.userID'), primary_key=True, nullable=False)
-    activityID = db.Column(db.Integer, db.ForeignKey('CW2.Activity.activityID'), primary_key=True, nullable=False)    
+    __table_args__ = get_table_args()
+    userID = db.Column(db.Integer, db.ForeignKey(fk_ref('Users', 'userID')), primary_key=True, nullable=False)
+    activityID = db.Column(db.Integer, db.ForeignKey(fk_ref('Activity', 'activityID')), primary_key=True, nullable=False)    
 
 class Roles(db.Model):
     __tablename__ = "Roles"
-    __table_args__ = {"schema": "CW2", 'implicit_returning': False}
+    __table_args__ = get_table_args()
     roleID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     role_name = db.Column(db.String(10), nullable=False, unique=True)
 
 class UserSavedTrails(db.Model):
     __tablename__ = "UserSavedTrails"
-    __table_args__ = {"schema": "CW2", 'implicit_returning': False}
-    userID = db.Column(db.Integer, db.ForeignKey('CW2.Users.userID'), primary_key=True,  nullable=False)
+    __table_args__ = get_table_args()
+    userID = db.Column(db.Integer, db.ForeignKey(fk_ref('Users', 'userID')), primary_key=True, nullable=False)
     trailID = db.Column(db.Integer, primary_key=True, nullable=False)
-    trail_saved_timestamp = db.Column(db.DateTime, nullable=False, server_default=db.func.sysdatetime())
+    trail_saved_timestamp = db.Column(db.DateTime, nullable=False, server_default=get_timestamp_default())
  
 
 class Users(db.Model):
     __tablename__ = "Users"
-    __table_args__ = {"schema": "CW2", 'implicit_returning':False}
+    __table_args__ = get_table_args()
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    roleID = db.Column(db.Integer, db.ForeignKey('CW2.Roles.roleID'), nullable=False)
+    roleID = db.Column(db.Integer, db.ForeignKey(fk_ref('Roles', 'roleID')), nullable=False)
     hashed_password = db.Column(db.String(128), nullable=False)
-    locationID = db.Column(db.Integer, db.ForeignKey('CW2.Location.locationID'))
+    locationID = db.Column(db.Integer, db.ForeignKey(fk_ref('Location', 'locationId')))
     username = db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(60), nullable=True)
     phone_no = db.Column(db.Integer, nullable=True)
