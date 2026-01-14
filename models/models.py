@@ -4,7 +4,7 @@ from config.config import db
 class Location(db.Model):
     __tablename__ = "Location"
     __table_args__ = {"schema": "CW2", 'implicit_returning':False}
-    locationId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    locationID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     location = db.Column(db.String(255), nullable=False)        
 
 

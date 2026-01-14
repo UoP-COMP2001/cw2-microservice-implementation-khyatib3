@@ -1,10 +1,8 @@
 openapi: 3.0.0
 info:
   title: "AllTrails Users RESTful API"
+  description: "ProfileService Microservice API for AllTrails"
   version: 1.0.0
-
-servers:
-  - url: "/profileservice-api"
 
 # add security
 security:
@@ -99,7 +97,7 @@ components:
         type: string
 
 paths:
-  /user:
+  /api/user:
     get:
       operationId: python_endpoints.user.getUser
       security:
@@ -190,8 +188,8 @@ paths:
         "204":
           description: User deleted successfully          
 
-  /user/activities/{activity_name}:
-    put:
+  /api/user/activities/{activity_name}:
+    post:
       operationId: python_endpoints.user.addActivity
       security:
         - basicAuth: []
@@ -215,7 +213,7 @@ paths:
         "401":
           description: "Credentials not found or invalid"
 
-  /admin/accounts:
+  /api/admin/accounts:
     get:
       security:
         - basicAuth: []
