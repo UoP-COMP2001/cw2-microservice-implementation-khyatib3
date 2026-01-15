@@ -54,6 +54,7 @@ components:
           type: string
           format: date
           description: "Date of birth."
+          example: "1990-01-01"
         phone_no:
           type: integer
           description: "Phone number."
@@ -491,4 +492,74 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                                             
+                    type: string
+
+    put:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.performProfileUpdate
+      tags:
+        - Admin
+      summary: "Update a specific general user account by email"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user to update their account"
+      requestBody:
+        description: "Updated user data"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountSchema"
+      responses:
+        "200":
+          description: "User account updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User account updated successfully"
+        "400":
+          description: "Invalid data input"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found or Admin not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Username or email already taken"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                                                          

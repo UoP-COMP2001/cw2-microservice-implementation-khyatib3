@@ -59,10 +59,11 @@ class CreateAccountSchema(Schema):
 create_account_schema = CreateAccountSchema()
 
 class UpdateAccountSchema(Schema):
-    phone_no = fields.Int()
+    username = fields.Str(validate=validate.Length(min=4, max=40))
     first_name = fields.Str(validate=validate.Length(max=40))
     last_name = fields.Str(validate=validate.Length(max=40))
     dob = fields.Date()
+    phone_no = fields.Int()
     height = fields.Decimal()
     weight = fields.Decimal()
     about_me = fields.Str(validate=validate.Length(max=700))

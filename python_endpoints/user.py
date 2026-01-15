@@ -80,9 +80,7 @@ def updateUser():
         if existing and existing.userID != user.userID:
             return make_response(jsonify({"error_message": "Username already taken"}), 409)
         user.username = validated_data['username']
-    
-    if 'password' in validated_data:
-        user.hashed_password = argon2.hash(validated_data['password'])
+
     
     if 'first_name' in validated_data:
         user.first_name = validated_data['first_name']
