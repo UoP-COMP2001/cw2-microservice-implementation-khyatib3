@@ -1,7 +1,7 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
-from models.models import Users, Roles
-from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema
+from models.models import Users, Roles, Location
+from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema, update_location_schema, display_locations_schema
 from marshmallow import ValidationError
 from utility.utilities import authoriseAdmin
 from passlib.hash import argon2
@@ -163,3 +163,40 @@ def createUserAccount():
     return make_response(jsonify({
         "message": "User account created successfully"
     }), 201)
+    
+def addNewLocation(new_location):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # validate location format first, return error if in ivalid format
+    try:
+        validated_data = update_location_schema.load({"location": new_location})
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": err.messages}), 400)
+    
+    # then if valid, check if location already exists
+    existing_location = Location.query.filter_by(location=new_location).first()
+    if existing_location:
+        return make_response(jsonify({"error_message": "Location already exists"}), 409)
+    
+    # add new location
+    new_location_entry = Location(location=new_location)
+    db.session.add(new_location_entry)
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Location added successfully"}), 201)
+
+def showAllLocations():
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    all_locations = Location.query.all() # get all locations
+    
+    if not all_locations:
+        return make_response(jsonify({"error_message": "No locations found"}), 404)
+    
+    return make_response(jsonify({"locations": display_locations_schema.dump(all_locations)}), 200) # show locations

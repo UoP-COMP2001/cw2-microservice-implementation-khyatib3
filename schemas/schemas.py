@@ -84,4 +84,10 @@ class UpdateLocationSchema(Schema):
         ]
     )
 update_location_schema = UpdateLocationSchema()
+
+class DisplayLocationSchema(Schema):
+    locationID = fields.Int(dump_only=True)
+    location = fields.Str(dump_only=True)
     
+display_location_schema = DisplayLocationSchema()
+display_locations_schema = DisplayLocationSchema(many=True)

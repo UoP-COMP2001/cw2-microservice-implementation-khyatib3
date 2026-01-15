@@ -385,7 +385,7 @@ paths:
         - basicAuth: []
       operationId: python_endpoints.administrator.getAllUsers
       tags:
-        - Admin
+        - Admin (User management)
       summary: "Show all user accounts"
       responses:
         "200":
@@ -421,7 +421,7 @@ paths:
         - basicAuth: []
       operationId: python_endpoints.administrator.createUserAccount
       tags:
-        - Admin
+        - Admin (User management)
       summary: "Create a account for new general user"
       requestBody:
         description: "User credentials to create account from"
@@ -468,7 +468,7 @@ paths:
         - basicAuth: []
       operationId: python_endpoints.administrator.getSpecificUser
       tags:
-        - Admin
+        - Admin (User management)
       summary: "Show a specific user account by email"
       parameters:
         - name: user_email
@@ -509,7 +509,7 @@ paths:
         - basicAuth: []
       operationId: python_endpoints.administrator.deleteGeneralUser
       tags:
-        - Admin
+        - Admin (User management)
       summary: "Delete a specific general user account by email"
       parameters:
         - name: user_email
@@ -545,7 +545,7 @@ paths:
         - basicAuth: []
       operationId: python_endpoints.administrator.performProfileUpdate
       tags:
-        - Admin
+        - Admin (User management)
       summary: "Update a specific general user account by email"
       parameters:
         - name: user_email
@@ -608,4 +608,95 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                                                          
+                    type: string       
+
+  /admin/locations/{new_location}:
+    post:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.addNewLocation
+      tags:
+        - Admin (Locations management)
+      summary: "Add a new location to the database"
+      parameters:
+        - name: new_location
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Name of the new location to add"
+      responses:
+        "201":
+          description: "Location added successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: "Invalid location format"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Location already exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+
+  /admin/locations: 
+    get:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.showAllLocations
+      tags:
+        - Admin (Locations management)
+      summary: "Retrieve all locations from the database"
+      responses:
+        "200":
+          description: "Successfully retrieved all locations"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Location data
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "No locations found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                                                                                              
