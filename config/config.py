@@ -9,7 +9,7 @@ basedir = pathlib.Path(__file__).parent.resolve()
 # enable swagger ui
 from connexion.options import SwaggerUIOptions
 swagger_ui_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
-# Use FlaskApp explicitly for Flask applications
+
 connex_app = FlaskApp(__name__, specification_dir=basedir.parent, swagger_ui_options=swagger_ui_options)
 
 app = connex_app.app

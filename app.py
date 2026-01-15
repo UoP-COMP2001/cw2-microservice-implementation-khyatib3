@@ -5,38 +5,35 @@ from models.models import Users, UserActivity, Location, Activity
 from connexion.options import SwaggerUIOptions
 import os
 import pathlib
+import sys
 
-# Add the API here - only once at startup
-# connex_app.add_api(basedir.parent / "swagger" / "swagger.yml", name="MyUniqueNameKB123 ProfileService API")
-
-# import endpoints for connexion so it can resolve operationId references
+# import endpoints for connexion
 import python_endpoints.user
 import python_endpoints.administrator
 
-# Add API after all imports are complete
+#enable swagger ui so endpoints can be tested
 from connexion.options import SwaggerUIOptions
 swagger_ui_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
 
-# Patch Flask app's register_blueprint to handle duplicate registration gracefully
-# This is needed because connexion middleware tries to register blueprints that may already be registered
+
 _original_register = connex_app.app.register_blueprint
 
 def _safe_register_blueprint(blueprint, **options):
-    """Safely register blueprint, ignoring if already registered"""
+    # added as was getting many 'non-unique blueprint' errors durng runime
     name = options.get('name', blueprint.name)
-    # Check if already registered
+    # check if blueprint already exists
     if name in connex_app.app.blueprints:
-        return  # Already registered, skip
+        return 
     try:
         return _original_register(blueprint, **options)
     except ValueError as e:
         if "already registered" in str(e):
-            return  # Already registered, ignore
+            return 
         raise
 
 connex_app.app.register_blueprint = _safe_register_blueprint
 
-# Add the API
+# add swagger
 connex_app.add_api(
     basedir.parent / "swagger" / "swagger.yml", 
     base_path="/profileservice-api",
@@ -44,9 +41,6 @@ connex_app.add_api(
 )
 
 app = connex_app
-
-# Note: Starlette exception handling is now done by connexion's middleware
-# We don't need a custom handler here
 
 @app.route("/")
 def home():
@@ -57,7 +51,7 @@ def home():
         user_activities = UserActivity.query.all() # retrieving all users' activities
         return render_template("home.html", locations=locations, users=users, activities=activities, user_activities=user_activities)
     except Exception as e:
-        # show simple page and error if fails to connect to database
+        # show simple page and any error if fails to connect to database
         return f"""
         <html>
         <head><title>COMP2001</title></head>
@@ -72,15 +66,11 @@ def home():
         """, 200
 
 if __name__ == "__main__":
-    # For development only - in production, use uvicorn directly via docker-entrypoint.sh
-    # This avoids the development server warning
-    import sys
+    
     if os.getenv("FLASK_ENV") != "production" and "--production" not in sys.argv:
-        # Development mode - use connexion's run (shows warning, but useful for dev)
         host = os.getenv("HOST", "0.0.0.0")
         port = int(os.getenv("PORT", 8000))
         connex_app.run(host=host, port=port)
     else:
-        # Production mode - should be run via uvicorn in docker-entrypoint.sh
-        print("For production, run: uvicorn app:connex_app --host 0.0.0.0 --port 8000")
+        print("Run: uvicorn app:connex_app --host 0.0.0.0 --port 8000")
         sys.exit(1)
