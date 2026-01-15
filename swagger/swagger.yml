@@ -415,6 +415,52 @@ paths:
                 properties:
                   error_message:
                     type: string
+
+    post:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.createUserAccount
+      tags:
+        - Admin
+      summary: "Create a account for new general user"
+      requestBody:
+        description: "User credentials to create account from"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserSchema"
+      responses:
+        "201":
+          description: "User account created successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User account created successfully"
+        "400":
+          description: Invalid data input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
+        "409":
+          description: Conflict (username or email already exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+                    example: "Username already taken"                
     
   /admin/accounts/{user_email}:                      
     get:

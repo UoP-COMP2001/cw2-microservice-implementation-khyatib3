@@ -1,7 +1,7 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
 from models.models import Users, Roles
-from schemas.schemas import display_users_schema, display_user_schema, update_account_schema
+from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema
 from marshmallow import ValidationError
 from utility.utilities import authoriseAdmin
 from passlib.hash import argon2
@@ -11,7 +11,7 @@ def getAllUsers():
     admin_user, error_response = authoriseAdmin()
     if error_response:
         status = error_response.get("status", 401)
-        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorized")}), status)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised")}), status)
     
     all_users = Users.query.filter_by(roleID=2).all()  # get all general users
     return make_response(jsonify(display_users_schema.dump(all_users)), 200)
@@ -20,7 +20,7 @@ def getSpecificUser(user_email):
     admin_user, error_response = authoriseAdmin()
     if error_response:
         status = error_response.get("status", 401)
-        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorized")}), status)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised")}), status)
     
     specific_user = Users.query.filter_by(email=user_email).first()  # find user by email
     if not specific_user:
@@ -32,7 +32,7 @@ def deleteGeneralUser(user_email):
     admin_user, error_response = authoriseAdmin()
     if error_response:
         status = error_response.get("status", 401)
-        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorized")}), status)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised")}), status)
     
     user_to_delete = Users.query.filter_by(email=user_email).first()  # find user by email
     if not user_to_delete:
@@ -53,7 +53,7 @@ def performProfileUpdate(user_email):
     admin_user, error_response = authoriseAdmin()
     if error_response:
         status = error_response.get("status", 401)
-        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorized")}), status)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised")}), status)
     
     data = request.get_json() # get data from request body
     
@@ -110,3 +110,56 @@ def performProfileUpdate(user_email):
     
     db.session.commit()
     return make_response(jsonify({"message": "User account updated successfully"}), 200)
+
+def createUserAccount():
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    creds = request.get_json() or request.form  # getting entered login details
+    
+    # validate data using schema first
+    try:
+        validated_data = create_account_schema.load(creds)
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": err.messages}), 400)
+    
+    username = validated_data.get("username")
+    email = validated_data.get("email")
+    password = validated_data.get("password")
+    roleID = 2  # set roleID to belong to general user role by default
+
+    # extra email validation (safety measure)
+    if not email:
+        return make_response(jsonify({"error_message": "Email is required"}), 400)
+    
+    # convert to lowercase adn remove whitespaces
+    email = email.lower().strip()
+    
+    # check for existing email (case-insensitive check)
+    existing_email = Users.query.filter_by(email=email).first()
+    if existing_email:
+        return make_response(jsonify({"error_message": "User with this email already exists"}), 409)
+    
+    # check for existing username
+    existing_username = Users.query.filter_by(username=username).first()
+    if existing_username:
+        return make_response(jsonify({"error_message": "Username already taken"}), 409)
+    
+    # hash the password with argon 2
+    hashed_password = argon2.hash(password)
+    
+    # create new user account
+    new_user = Users(
+        username=username,
+        hashed_password=hashed_password,
+        roleID=roleID,
+        email=email
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    return make_response(jsonify({
+        "message": "User account created successfully"
+    }), 201)
