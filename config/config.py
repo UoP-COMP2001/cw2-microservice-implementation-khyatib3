@@ -5,14 +5,14 @@ from flask_marshmallow import Marshmallow
 
 basedir = pathlib.Path(__file__).parent.resolve()
 
-# Enable Swagger UI explicitly
+# enable swagger ui
 from connexion.options import SwaggerUIOptions
 swagger_ui_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
 connex_app = connexion.App(__name__, specification_dir=basedir.parent, swagger_ui_options=swagger_ui_options)
 
 app = connex_app.app
 
-# Configure template folder to point to project root templates directory
+
 template_path = basedir.parent / "templates"
 app.template_folder = str(template_path.absolute())
 

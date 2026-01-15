@@ -1,4 +1,4 @@
-from config.config import app
+from config.config import app , db
 import os
 
 # Helper function to get database type from environment or config
@@ -33,3 +33,12 @@ def fk_ref(table_name, column_name):
         return f"{table_name}.{column_name}"
     else:
         return f"CW2.{table_name}.{column_name}"
+
+# Helper function to get default timestamp function based on database type
+def get_timestamp_default():
+    """Returns appropriate timestamp default function based on database type"""
+    db_type = get_db_type()
+    if db_type == "MYSQL":
+        return db.func.now()
+    else:
+        return db.func.sysdatetime()

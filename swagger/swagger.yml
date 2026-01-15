@@ -1,8 +1,10 @@
 openapi: 3.0.0
 info:
   title: "AllTrails Users RESTful API"
-  description: "ProfileService Microservice API for AllTrails"
   version: 1.0.0
+
+servers:
+  - url: "/profileservice-api1"
 
 # add security
 security:
@@ -97,7 +99,7 @@ components:
         type: string
 
 paths:
-  /api/user:
+  /user:
     get:
       operationId: python_endpoints.user.getUser
       security:
@@ -108,13 +110,34 @@ paths:
       responses:
         "200":
           description: "User profile retrieved successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User profile data
         "401":
-          description: "Access denied"
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
         "404":
-          description: "Error occured locating user"
+          description: "Error occurred locating user"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
 
     post:
       operationId: python_endpoints.user.createNewUser
+      # No security required - users can create accounts without authentication
+      security: []
       tags:
         - Users
       summary: "Create a account for new user"
@@ -128,6 +151,24 @@ paths:
       responses:
         "201":
           description: "Account created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Account created"
+        "400":
+          description: Invalid data input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
         "409":
           description: Conflict (username or email already exists)
           content:
@@ -135,13 +176,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  error_message:
                     type: string
-                    enum: [USERNAME_EXISTS, EMAIL_EXISTS]
-                  message:
-                    type: string
-        "400":
-          description: Invalid data input
+                    example: "Username already taken"
 
     put:
       operationId: python_endpoints.user.updateUser
@@ -158,10 +195,53 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdateAccountSchema"
       responses:
-        "404":
-          description: User not found
         "200":
           description: "User account updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User account updated successfully"
+        "400":
+          description: Invalid data input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Username or email already taken"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
 
     delete:
       operationId: python_endpoints.user.deleteUser
@@ -173,23 +253,28 @@ paths:
       responses:
         "404":
           description: Could not find this user to delete
-        "401":
-          description: User issue
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  error_message:
                     type: string
-                    enum: [ACCESS_DENIED, CREDENTIALS_NOT_FOUND]
-                  message:
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
                     type: string
+                    example: "Access denied"
         "204":
           description: User deleted successfully          
 
-  /api/user/activities/{activity_name}:
-    post:
+  /user/activities/{activity_name}:
+    put:
       operationId: python_endpoints.user.addActivity
       security:
         - basicAuth: []
@@ -206,14 +291,42 @@ paths:
       responses:
         "201":
           description: "Activity added successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         "404":
           description: "User not found or Activity not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
         "409":
           description: "User already has this activity"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
         "401":
           description: "Credentials not found or invalid"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
 
-  /api/admin/accounts:
+  /admin/accounts:
     get:
       security:
         - basicAuth: []
@@ -224,5 +337,28 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved all user accounts"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: User account data
         "401":
-          description: "Unauthorised access"        
+          description: "Unauthorised access or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string        
