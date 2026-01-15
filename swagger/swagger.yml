@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: "/profileservice-api1"
+  - url: "/profileservice-api"
 
 # add security
 security:
@@ -77,6 +77,14 @@ components:
         time_preference_speed:
           type: string
           description: "Time preference for speed."
+    UpdateLocationSchema:
+      type: object
+      description: Validation schema for updating user location.
+      properties:
+        location:
+          type: string
+          description: "Location name, following format 'City, County, Country'"
+          example: "Plymouth, Devon, UK"
   securitySchemes:
     basicAuth:
       type: http
@@ -326,6 +334,50 @@ paths:
                   error_message:
                     type: string
 
+  /user/location/{location}:
+    put:
+      operationId: python_endpoints.user.updateUserOwnLocation
+      security:
+        - basicAuth: []
+      tags:
+        - Users
+      summary: "Update user's location"
+      parameters:
+        - name: location
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Name of the location to set for the user"
+      responses:
+        "200":
+          description: "User's location updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "Could not find this user to update location or Location does not exist"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                  
+
   /admin/accounts:
     get:
       security:
@@ -361,4 +413,82 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string        
+                    type: string
+    
+  /admin/accounts/{user_email}:                      
+    get:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.getSpecificUser
+      tags:
+        - Admin
+      summary: "Show a specific user account by email"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user to retrieve their profile"
+      responses:
+        "200":
+          description: "Successfully retrieved the user account"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Specific user's account data
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found or Admin not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+
+    delete:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.deleteGeneralUser
+      tags:
+        - Admin
+      summary: "Delete a specific general user account by email"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user to delete their account"
+      responses:
+        "204":
+          description: "User deleted successfully"
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found or Admin not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                                             

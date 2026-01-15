@@ -1,7 +1,7 @@
 from config.config import db, ma, app
 from flask import jsonify, request, make_response
-from models.models import Users, UserActivity, Activity, UserSavedTrails, Roles
-from schemas.schemas import create_account_schema, display_user_schema, update_account_schema
+from models.models import Users, UserActivity, Activity, UserSavedTrails, Roles, Location
+from schemas.schemas import create_account_schema, display_user_schema, update_account_schema, update_location_schema
 from marshmallow import ValidationError
 from passlib.hash import argon2
 import authenticator
@@ -147,6 +147,42 @@ def addActivity(activity_name):
     db.session.commit()
     
     return make_response(jsonify({"message": "Activity added successfully"}), 201)
+
+def updateUserOwnLocation(location):
+    if not request.authorization:
+        return make_response(jsonify({"error_message": "Credentials not found"}), 401)
+    
+    # get credentials from authorization header
+    email = request.authorization.username
+    password = request.authorization.password
+
+    if not email or not password:
+        return make_response(jsonify({"error_message": "Email and password not found"}), 401)
+
+    user = Users.query.filter_by(email=email).first()  # find user with given email
+    
+    if not user:
+        return make_response(jsonify({"error_message": "Could not find this user to update location"}), 404)
+    
+    # verify password
+    if not argon2.verify(password, user.hashed_password):
+        return make_response(jsonify({"error_message": "Access denied"}), 401)
+    
+    # validate location format
+    try:
+        validated_data = update_location_schema.load({"location": location})
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": err.messages}), 400)
+    
+    # find location in database
+    location_obj = Location.query.filter_by(location=location).first()
+    if not location_obj:
+        return make_response(jsonify({"error_message": "Location does not exist"}), 404)
+    
+    # update user's locationID
+    user.locationID = location_obj.locationId
+    db.session.commit()
+    return make_response(jsonify({"message": "User's location updated successfully"}), 200)
 
 def createNewUser(): # no authentication required
     creds = request.get_json() or request.form  # getting entered login details

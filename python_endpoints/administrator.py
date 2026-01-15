@@ -1,34 +1,47 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
 from models.models import Users, Roles
-from schemas.schemas import display_users_schema
+from schemas.schemas import display_users_schema, display_user_schema
+from utility.utilities import authoriseAdmin
 from passlib.hash import argon2
 
 
 def getAllUsers():
-    if not request.authorization:
-        return make_response(jsonify({"error_message": "Credentials not found"}), 401)
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        return jsonify(error_response)
     
-    # get admin credentials
-    admin_email = request.authorization.username
-    admin_password = request.authorization.password
+    all_users = Users.query.filter_by(roleID=2).all()  # get all general users
+    return make_response(jsonify(display_users_schema.dump(all_users)), 200)
 
-    if not admin_email or not admin_password:
-        return make_response(jsonify({"error_message": "Credentials not found"}), 401)
+def getSpecificUser(user_email):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        return jsonify(error_response)
     
-    # find user with given email to get roleID
-    user = Users.query.filter_by(email=admin_email).first()  
-    if not user:
+    specific_user = Users.query.filter_by(email=user_email).first()  # find user by email
+    if not specific_user:
         return make_response(jsonify({"error_message": "User not found"}), 404)
-
-    # verify password against user's hashed password
-    if not argon2.verify(admin_password, user.hashed_password):
-        return make_response(jsonify({"error_message": "Access denied"}), 401)
-
-    roleID = user.roleID  # get user role id
-    user_role = Roles.query.filter_by(roleID=roleID).first()  # find user role from roleID
-    if not user_role or user_role.role_name != "Admin":
-        return make_response(jsonify({"error_message": "Unauthorised access"}), 401)
     
-    all_users = Users.query.all()  # get all users
-    return make_response(jsonify(display_users_schema.dump(all_users)), 200)  
+    return make_response(jsonify(display_user_schema.dump(specific_user)), 200)
+
+def deleteGeneralUser(user_email):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        return jsonify(error_response)
+    
+    user_to_delete = Users.query.filter_by(email=user_email).first()  # find user by email
+    if not user_to_delete:
+        return make_response(jsonify({"error_message": "User not found"}), 404)
+    
+    if user_to_delete.roleID != 2:  # ensure only general users can be deleted
+        return make_response(jsonify({"error_message": "Cannot delete non-general user"}), 401)
+    
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        return make_response(jsonify({"message": "User deleted successfully"}), 200)
+    except Exception as e:
+        db.session.rollback()
+        return make_response(jsonify({"error_message": f"Error deleting user: {user_email}"}), 500)
+     

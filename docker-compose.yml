@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: khyati-profileservice-api
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DB_TYPE=MSSQL
+    restart: unless-stopped
+    ports:
+      - "8000:8000"

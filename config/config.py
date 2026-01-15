@@ -10,8 +10,10 @@ from connexion.options import SwaggerUIOptions
 swagger_ui_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
 connex_app = connexion.App(__name__, specification_dir=basedir.parent, swagger_ui_options=swagger_ui_options)
 
-app = connex_app.app
+# Add API once at startup
+connex_app.add_api(basedir.parent / "swagger" / "swagger.yml", name="MyUniqueNameKB123 ProfileService API")
 
+app = connex_app.app
 
 template_path = basedir.parent / "templates"
 app.template_folder = str(template_path.absolute())
@@ -31,3 +33,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy()
 ma = Marshmallow()
+
+db.init_app(app)
+ma.init_app(app)

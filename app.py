@@ -2,16 +2,17 @@ from flask import jsonify, render_template, request
 from config.config import connex_app, basedir
 from models.models import Users, UserActivity, Location, Activity
 from connexion.options import SwaggerUIOptions
+import os
+import pathlib
+
+# Add the API here - only once at startup
+# connex_app.add_api(basedir.parent / "swagger" / "swagger.yml", name="MyUniqueNameKB123 ProfileService API")
 
 # import endpoints for connexion so it can resolve operationId references
 import python_endpoints.user
 import python_endpoints.administrator
 
 app = connex_app
-
-# enable Swagger UI for api
-api_swagger_ui_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
-app.add_api(basedir.parent / "swagger" / "swagger.yml", swagger_ui_options=api_swagger_ui_options,name="ProfileService API")
 
 @app.route("/")
 def home():
@@ -37,4 +38,7 @@ def home():
         """, 200
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8000)
+    # Use environment variables for host/port, defaulting to values suitable for Docker
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 8000))
+    connex_app.run(host=host, port=port)

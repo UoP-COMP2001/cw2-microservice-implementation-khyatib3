@@ -70,3 +70,17 @@ class UpdateAccountSchema(Schema):
     preferred_unit_metric = fields.Str(validate=validate.Length(max=10))
     time_preference_speed = fields.Str(validate=validate.Length(max=10))
 update_account_schema = UpdateAccountSchema()
+
+class UpdateLocationSchema(Schema):
+    location = fields.Str(
+        required=True,
+        validate=[
+            validate.Length(max=255),
+            validate.Regexp(
+                r'^[a-zA-Z\s]+,[a-zA-Z\s]+,[a-zA-Z\s]+$',
+                error='Location must be in format: City, County, Country'
+            )
+        ]
+    )
+update_location_schema = UpdateLocationSchema()
+    
