@@ -699,4 +699,64 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                                                                                              
+                    type: string
+
+  /admin/locations/{old_location_name}/{new_location_name}:
+    put:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.updateExistingLocation
+      tags:
+        - Admin (Locations management)
+      summary: "Update an existing location's name"
+      parameters:
+        - name: old_location_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Current name of the location to update"
+        - name: new_location_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "New name for the location"
+      responses:
+        "200":
+          description: "Location updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: "Invalid location format"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: object
+                    description: Validation error messages from schema
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "Location not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                                                                                                             

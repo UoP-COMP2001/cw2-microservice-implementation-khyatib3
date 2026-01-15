@@ -73,12 +73,12 @@ class UpdateAccountSchema(Schema):
 update_account_schema = UpdateAccountSchema()
 
 class UpdateLocationSchema(Schema):
-    location = fields.Str(
+        location = fields.Str(
         required=True,
         validate=[
             validate.Length(max=255),
             validate.Regexp(
-                r'^[a-zA-Z\s]+,[a-zA-Z\s]+,[a-zA-Z\s]+$',
+                r'^[a-zA-Z0-9\s\-\.]+,\s*[a-zA-Z0-9\s\-\.]+,\s*[a-zA-Z0-9\s\-\.]+$',
                 error='Location must be in format: City, County, Country'
             )
         ]

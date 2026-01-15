@@ -200,3 +200,37 @@ def showAllLocations():
         return make_response(jsonify({"error_message": "No locations found"}), 404)
     
     return make_response(jsonify({"locations": display_locations_schema.dump(all_locations)}), 200) # show locations
+
+def updateExistingLocation(old_location_name, new_location_name):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # validate old location format first
+    try:
+        validated_data = update_location_schema.load({"location": old_location_name})
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": f"Old location '{old_location_name}' validation failed: {err.messages}"}), 400)
+    
+    # validate new location format
+    try:
+        validated_data_new = update_location_schema.load({"location": new_location_name})
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": f"New location '{new_location_name}' validation failed: {err.messages}"}), 400)
+    
+    # find existing location to update
+    location_to_update = Location.query.filter_by(location=old_location_name).first()
+    if not location_to_update:
+        return make_response(jsonify({"error_message": "Location to update not found"}), 404)
+    
+    # check if new location name already exists
+    existing_location = Location.query.filter_by(location=new_location_name).first()
+    if existing_location:
+        return make_response(jsonify({"error_message": "New location name already exists"}), 409)
+    
+    # perform update
+    location_to_update.location = new_location_name
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Location updated successfully"}), 200)
