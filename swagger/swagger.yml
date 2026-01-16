@@ -895,4 +895,63 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                            
+                    type: string   
+
+  /admin/activities/{old_activity_name}/{new_activity_name}:
+    put:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.updateExistingActivity
+      tags:
+        - Admin (Activities management)
+      summary: "Update an existing activity"
+      parameters:
+        - name: old_activity_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Current name of the activity to update"
+        - name: new_activity_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "New name/details for the activity"
+      responses:
+        "200":
+          description: "Activity updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "Activity not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Activity with new name/details already exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string

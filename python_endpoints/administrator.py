@@ -295,4 +295,26 @@ def showAllActivities():
     activities_list = [activity.activity_name for activity in all_activities]
     
     return make_response(jsonify({"activities": activities_list}), 200) # show activities
+
+def updateExistingActivity(old_activity_name, new_activity_name):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # find existing activity to update
+    activity_to_update = Activity.query.filter_by(activity_name=old_activity_name).first()
+    if not activity_to_update:
+        return make_response(jsonify({"error_message": "Activity to update not found"}), 404)
+    
+    # check if new activity name already exists
+    existing_activity = Activity.query.filter_by(activity_name=new_activity_name).first()
+    if existing_activity:
+        return make_response(jsonify({"error_message": "New activity name already exists"}), 409)
+    
+    # perform update
+    activity_to_update.activity_name = new_activity_name
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Activity updated successfully"}), 200)
     
