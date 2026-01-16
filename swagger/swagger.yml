@@ -759,4 +759,60 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                                                                                                             
+                    type: string
+
+  /admin/locations/{location_name}:
+    delete:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.deleteLocation
+      tags:
+        - Admin (Locations management)
+      summary: "Delete a location from the database"
+      parameters:
+        - name: location_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Name of the location to delete"
+      responses:
+        "200":
+          description: "Location deleted successfully"
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "Location not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "400":
+          description: "Invalid location format"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Cannot delete location as it is assigned to one or more users"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+

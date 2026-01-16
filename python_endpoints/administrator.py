@@ -1,6 +1,6 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
-from models.models import Users, Roles, Location
+from models.models import Users, Roles, Location, Activity
 from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema, update_location_schema, display_locations_schema
 from marshmallow import ValidationError
 from utility.utilities import authoriseAdmin
@@ -234,3 +234,34 @@ def updateExistingLocation(old_location_name, new_location_name):
     db.session.commit()
     
     return make_response(jsonify({"message": "Location updated successfully"}), 200)
+
+def deleteLocation(location_name):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # validate location input fist
+    try:
+        validated_data = update_location_schema.load({"location": location_name})
+    except ValidationError as err:
+        return make_response(jsonify({"error_message": err.messages}), 400)
+    
+    # find location to delete
+    location_to_delete = Location.query.filter_by(location=location_name).first()
+    if not location_to_delete:
+        return make_response(jsonify({"error_message": "Location not found"}), 404)
+    
+    #check if this location is assigned to any users
+    location_delete_ID = location_to_delete.locationId
+    users_with_location = Users.query.filter_by(locationID=location_delete_ID).all()
+    if users_with_location:
+        return make_response(jsonify({"error_message": f"Cannot delete location '{location_name}' as it is assigned to users"}), 409)
+    
+    # delete location 
+    db.session.delete(location_to_delete)
+    db.session.commit()
+    return make_response(jsonify({"message": "Location deleted successfully"}), 200)
+
+
+    
