@@ -1128,3 +1128,53 @@ paths:
                 properties:
                   error_message:
                     type: string
+
+  /admin/user-saved-trails/{user_email}/{new_trail_id}:
+    post:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.addSavedTrailToUser
+      tags:
+        - Admin (Saved Trails management)
+      summary: "Add a saved trail for a user by email and trail ID"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user"
+        - name: new_trail_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID of the saved trail to add"
+      responses:
+        "201":
+          description: "Saved trail added successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string

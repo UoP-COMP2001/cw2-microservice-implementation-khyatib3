@@ -413,3 +413,29 @@ def deleteUserSavedTrail(user_email, trail_id):
     db.session.commit()
     
     return make_response(jsonify({"message": "Saved trail entry deleted successfully"}), 200)
+
+def addSavedTrailToUser(user_email, new_trail_id):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    #find user by email
+    user = Users.query.filter_by(email=user_email).first()
+    if not user:
+        return make_response(jsonify({"error_message": "User not found"}), 404)
+    
+    #get userID
+    userID = user.userID
+    
+    #check if trail already saved by user
+    existing_entry = UserSavedTrails.query.filter_by(userID=userID, trailID=new_trail_id).first()
+    if existing_entry:
+        return make_response(jsonify({"error_message": "Trail already saved by this user"}), 409)
+    
+    #add new saved trail entry
+    new_saved_trail = UserSavedTrails(userID=userID, trailID=new_trail_id)
+    db.session.add(new_saved_trail)
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Trail saved for user successfully"}), 201)
