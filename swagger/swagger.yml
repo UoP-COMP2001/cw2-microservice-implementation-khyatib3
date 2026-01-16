@@ -69,6 +69,9 @@ components:
         about_me:
           type: string
           description: "About me bio."
+        saved_trail_id:
+          type: integer
+          description: "ID of a saved trail."
         marketing_language:
           type: string
           description: "Preferred marketing language."
@@ -1037,4 +1040,48 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                                   
+                    type: string
+
+  /admin/user-saved-trails/{user_email}:
+    get:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.getUserSavedTrails
+      tags:
+        - Admin (Saved Trails management)
+      summary: "Retrieve all saved trails for a specific user by email"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user to retrieve their saved trails"
+      responses:
+        "200":
+          description: "Successfully retrieved user's saved trails"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: User's saved trail data
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found or No saved trails found for this user"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string

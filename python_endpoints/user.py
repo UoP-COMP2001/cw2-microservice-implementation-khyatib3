@@ -96,6 +96,19 @@ def updateUser():
         user.weight = validated_data['weight']
     if 'marketing_language' in validated_data:
         user.marketing_language = validated_data['marketing_language']
+    if 'saved_trail_id' in validated_data:
+        
+        trail_id = validated_data['saved_trail_id']
+        
+        # check if user already has this trail saved
+        existing_trail = UserSavedTrails.query.filter_by(userID=user.userID, trailID=trail_id).first()
+        if existing_trail:
+            return make_response(jsonify({"error_message": "User already has this trail saved"}), 409)
+        
+        # add the trail
+        new_saved_trail = UserSavedTrails(userID=user.userID, trailID=trail_id)
+        db.session.add(new_saved_trail)
+    
     if 'about_me' in validated_data:
         user.about_me = validated_data['about_me']
     if 'time_preference_speed' in validated_data:

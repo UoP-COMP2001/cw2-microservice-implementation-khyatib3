@@ -66,6 +66,7 @@ class UpdateAccountSchema(Schema):
     phone_no = fields.Int()
     height = fields.Decimal()
     weight = fields.Decimal()
+    saved_trail_id = fields.Int()
     about_me = fields.Str(validate=validate.Length(max=700))
     marketing_language = fields.Str(validate=validate.Length(max=50))
     preferred_unit_metric = fields.Str(validate=validate.Length(max=10))

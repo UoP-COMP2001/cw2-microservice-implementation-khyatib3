@@ -1,6 +1,6 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
-from models.models import Users, Roles, Location, Activity, UserActivity
+from models.models import Users, Roles, Location, Activity, UserActivity, UserSavedTrails
 from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema, update_location_schema, display_locations_schema
 from marshmallow import ValidationError
 from utility.utilities import authoriseAdmin
@@ -362,4 +362,30 @@ def showUserActivityAssociations():
         })
     
     return make_response(jsonify({"user_activity_associations": assoc_list}), 200)
+
+def getUserSavedTrails(user_email):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    #find user by email
+    user = Users.query.filter_by(email=user_email).first()
+    if not user:
+        return make_response(jsonify({"error_message": "User not found"}), 404)
+    
+    #get userID
+    userID = user.userID
+    user_saved_trails = UserSavedTrails.query.filter_by(userID=userID).all()
+    if not user_saved_trails:
+        return make_response(jsonify({"error_message": "No saved trails found for this user"}), 404)
+    
+    trails_list = []
+    for trail in user_saved_trails:
+        trails_list.append({
+            'trailID': trail.trailID,
+            'trail_saved_timestamp': trail.trail_saved_timestamp
+        })
+    
+    return make_response(jsonify({"saved_trails": trails_list}), 200)
     
