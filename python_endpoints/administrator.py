@@ -339,4 +339,27 @@ def deleteActivity(activity_to_delete):
     db.session.delete(activity_to_delete)
     db.session.commit()
     return make_response(jsonify({"message": "Activity deleted successfully"}), 200)
+
+def showUserActivityAssociations():
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    associations = UserActivity.query.all() # get all user activity associations
+    
+    if not associations:
+        return make_response(jsonify({"error_message": "No user-activity associations found"}), 404)
+    
+    #iterate through associations and add username and activities to list to display
+    assoc_list = []
+    for assoc in associations:
+        username = Users.query.get(assoc.userID).username
+        activity_name = Activity.query.get(assoc.activityID).activity_name
+        assoc_list.append({
+            "Username": username,
+            "Activity": activity_name
+        })
+    
+    return make_response(jsonify({"user_activity_associations": assoc_list}), 200)
     

@@ -1000,4 +1000,41 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string                  
+                    type: string 
+
+  /admin/user-activities: 
+    get:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.showUserActivityAssociations
+      tags:
+        - Admin (Activities management)
+      summary: "Retrieve all user-activity associations from the database"
+      responses:
+        "200":
+          description: "Successfully retrieved all user-activity associations"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: User-Activity association data
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "No user-activity associations found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                                   
