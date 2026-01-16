@@ -858,7 +858,7 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string        
+                    type: string                   
 
   /admin/activities:
     get:
@@ -895,7 +895,7 @@ paths:
                 type: object
                 properties:
                   error_message:
-                    type: string   
+                    type: string                   
 
   /admin/activities/{old_activity_name}/{new_activity_name}:
     put:
@@ -955,3 +955,49 @@ paths:
                 properties:
                   error_message:
                     type: string
+
+  /admin/activities/{activity_to_delete}:
+    delete:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.deleteActivity
+      tags:
+        - Admin (Activities management)
+      summary: "Delete an activity from the database"
+      parameters:
+        - name: activity_to_delete
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Name of the activity to delete"
+      responses:
+        "200":
+          description: "Activity deleted successfully"
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "Activity not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Cannot delete activity as it is associated with users"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                  

@@ -1,6 +1,6 @@
 from flask import jsonify, request, make_response
 from config.config import app, db
-from models.models import Users, Roles, Location, Activity
+from models.models import Users, Roles, Location, Activity, UserActivity
 from schemas.schemas import display_users_schema, display_user_schema, update_account_schema, create_account_schema, update_location_schema, display_locations_schema
 from marshmallow import ValidationError
 from utility.utilities import authoriseAdmin
@@ -317,4 +317,26 @@ def updateExistingActivity(old_activity_name, new_activity_name):
     db.session.commit()
     
     return make_response(jsonify({"message": "Activity updated successfully"}), 200)
+
+def deleteActivity(activity_to_delete):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # find activity to delete
+    activity_to_delete = Activity.query.filter_by(activity_name=activity_to_delete).first()
+    if not activity_to_delete:
+        return make_response(jsonify({"error_message": "Activity not found"}), 404)
+    
+    # check if any users are associated with this activity
+    activity_delete_ID = activity_to_delete.activityID
+    users_with_activity = UserActivity.query.filter_by(activityID=activity_delete_ID).all()
+    if users_with_activity:
+        return make_response(jsonify({"error_message": f"Cannot delete activity '{activity_to_delete}' as it is associated with users"}), 409)
+    
+    # delete activity 
+    db.session.delete(activity_to_delete)
+    db.session.commit()
+    return make_response(jsonify({"message": "Activity deleted successfully"}), 200)
     
