@@ -816,3 +816,83 @@ paths:
                   error_message:
                     type: string
 
+  /admin/activities/{activity_name}:
+    post:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.addNewActivity
+      tags:
+        - Admin (Activities management)
+      summary: "Add a new activity to the database"
+      parameters:
+        - name: activity_name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Name of the new activity to add"
+      responses:
+        "201":
+          description: "Activity added successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "409":
+          description: "Activity already exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string        
+
+  /admin/activities:
+    get:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.showAllActivities
+      tags:
+        - Admin (Activities management)
+      summary: "Retrieve all activities from the database"
+      responses:
+        "200":
+          description: "Successfully retrieved all activities"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Activity data
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "No activities found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string                            

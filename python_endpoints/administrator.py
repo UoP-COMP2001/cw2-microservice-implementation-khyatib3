@@ -263,5 +263,36 @@ def deleteLocation(location_name):
     db.session.commit()
     return make_response(jsonify({"message": "Location deleted successfully"}), 200)
 
+def addNewActivity(activity_name):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    # check if activity already exists
+    existing_activity = Activity.query.filter_by(activity_name=activity_name).first()
+    if existing_activity:
+        return make_response(jsonify({"error_message": "Activity already exists"}), 409)
+    
+    # add new activity
+    new_activity_entry = Activity(activity_name=activity_name)
+    db.session.add(new_activity_entry)
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Activity added successfully"}), 201)
 
+def showAllActivities():
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
+    
+    all_activities = Activity.query.all() # get all activities
+    
+    if not all_activities:
+        return make_response(jsonify({"error_message": "No activities found"}), 404)
+    
+    activities_list = [activity.activity_name for activity in all_activities]
+    
+    return make_response(jsonify({"activities": activities_list}), 200) # show activities
     
