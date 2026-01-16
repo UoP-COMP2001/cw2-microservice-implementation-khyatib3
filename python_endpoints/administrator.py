@@ -388,4 +388,28 @@ def getUserSavedTrails(user_email):
         })
     
     return make_response(jsonify({"saved_trails": trails_list}), 200)
+
+def deleteUserSavedTrail(user_email, trail_id):
+    admin_user, error_response = authoriseAdmin()
+    if error_response:
+        status = error_response.get("status", 401)
+        return make_response(jsonify({"error_message": error_response.get("error_message", "Unauthorised access")}), status)
     
+    #find user by email
+    user = Users.query.filter_by(email=user_email).first()
+    if not user:
+        return make_response(jsonify({"error_message": "User not found"}), 404)
+    
+    #get userID
+    userID = user.userID
+    
+    #find saved trail entry
+    saved_trail_entry = UserSavedTrails.query.filter_by(userID=userID, trailID=trail_id).first()
+    if not saved_trail_entry:
+        return make_response(jsonify({"error_message": "Saved trail entry not found for this user"}), 404)
+    
+    #delete saved trail entry
+    db.session.delete(saved_trail_entry)
+    db.session.commit()
+    
+    return make_response(jsonify({"message": "Saved trail entry deleted successfully"}), 200)

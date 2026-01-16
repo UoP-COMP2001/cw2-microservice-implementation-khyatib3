@@ -1085,3 +1085,46 @@ paths:
                 properties:
                   error_message:
                     type: string
+
+  /admin/user-saved-trails/{user_email}/{trail_id}:
+    delete:
+      security:
+        - basicAuth: []
+      operationId: python_endpoints.administrator.deleteUserSavedTrail
+      tags:
+        - Admin (Saved Trails management)
+      summary: "Delete a specific saved trail for a user by email and trail ID"
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Email of the user"
+        - name: trail_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID of the saved trail to delete"
+      responses:
+        "204":
+          description: "Saved trail deleted successfully"
+        "401":
+          description: "Access denied or credentials not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+        "404":
+          description: "User not found or Saved trail not found for this user"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
